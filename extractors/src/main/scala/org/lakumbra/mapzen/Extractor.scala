@@ -64,25 +64,25 @@ object Extractor {
         | JOIN continents con on cou.parent_id=con.id
       """.stripMargin)
           .repartition(10)
-    csvio.writeDataFrame(s"$baseFolder/output", locRegCouConDF.repartition(1))
-//    import ss.implicits._
-//    locRegCouConDF.map(r=>LocationDoc(
-//      r.getAs[Int]("con_id"),
-//      r.getAs[String]("con_name"),
-//      Location(r.getAs[Double]("con_latitude"), r.getAs[Double]("con_longitude")),
-//      r.getAs[Int]("cou_id"),
-//      r.getAs[String]("cou_name"),
-//      Location(r.getAs[Double]("cou_latitude"), r.getAs[Double]("cou_longitude")),
-//      r.getAs[Int]("reg_id"),
-//      r.getAs[String]("reg_name"),
-//      Location(r.getAs[Double]("reg_latitude"), r.getAs[Double]("reg_longitude")),
-//      r.getAs[Int]("loc_id"),
-//      r.getAs[String]("loc_name"),
-//      Location(r.getAs[Double]("loc_latitude"), r.getAs[Double]("loc_longitude"))
-//    )).write.mode(SaveMode.Append)
-//    .format("org.elasticsearch.spark.sql")
-//    .option("es.resource","mapzen_locations/location")
-//    .save()
+//    csvio.writeDataFrame(s"$baseFolder/output", locRegCouConDF.repartition(1))
+    import ss.implicits._
+    locRegCouConDF.map(r=>LocationDoc(
+      r.getAs[Int]("con_id"),
+      r.getAs[String]("con_name"),
+      Location(r.getAs[Double]("con_latitude"), r.getAs[Double]("con_longitude")),
+      r.getAs[Int]("cou_id"),
+      r.getAs[String]("cou_name"),
+      Location(r.getAs[Double]("cou_latitude"), r.getAs[Double]("cou_longitude")),
+      r.getAs[Int]("reg_id"),
+      r.getAs[String]("reg_name"),
+      Location(r.getAs[Double]("reg_latitude"), r.getAs[Double]("reg_longitude")),
+      r.getAs[Int]("loc_id"),
+      r.getAs[String]("loc_name"),
+      Location(r.getAs[Double]("loc_latitude"), r.getAs[Double]("loc_longitude"))
+    )).write.mode(SaveMode.Append)
+    .format("org.elasticsearch.spark.sql")
+    .option("es.resource","mapzen_locations/location")
+    .save()
 
     ss.stop()
   }
