@@ -8,37 +8,12 @@ import org.apache.spark.SparkContext._
 
 import org.elasticsearch.spark._
 
-object Extractor {
+object LocalityIndexer extends BaseIndexer{
 
   // scalastyle:off
   def main(args: Array[String]):Unit = {
-    val csvio = new SparkCSVIO
-    val config = ConfigFactory.load()
-    val ss = SparkSession.builder()
-      .config("es.index.auto.create", "true")
-        .config("es.nodes", config.getString("lakumbra.es.nodes"))
-        .config("es.cluster.name" ,config.getString("lakumbra.es.cluster"))
-      .appName("MapZenLocationIndexer")
-      .master("local")
-      .getOrCreate()
 
-    val baseFolder = config.getString("lakumbra.input-files.folder")
-    implicit val sqlContext = ss.sqlContext
-    csvio.loadCSVDataFrame(s"${baseFolder}/wof-continent-latest.csv")
-      .select("id", "name", "geom_latitude", "geom_longitude" )
-      .createOrReplaceTempView("continents")
-
-    csvio.loadCSVDataFrame(s"$baseFolder/wof-country-latest.csv")
-      .select("id", "name", "geom_latitude", "geom_longitude" , "parent_id", "iso_country")
-      .createOrReplaceTempView("countries")
-
-    csvio.loadCSVDataFrame(s"$baseFolder/wof-region-latest.csv")
-      .select("id", "name", "geom_latitude", "geom_longitude" , "country_id")
-      .createOrReplaceTempView("regions")
-
-    csvio.loadCSVDataFrame(s"$baseFolder/wof-locality-latest.csv")
-      .select("id", "name", "geom_latitude", "geom_longitude", "region_id", "country_id" )
-      .createOrReplaceTempView("locations")
+    implicit val (sparkSession, sqlContext) = super.init()
 
     val locRegCouConDF = sqlContext.sql(
       """
@@ -65,7 +40,7 @@ object Extractor {
       """.stripMargin)
           .repartition(10)
 //    csvio.writeDataFrame(s"$baseFolder/output", locRegCouConDF.repartition(1))
-    import ss.implicits._
+    import sparkSession.implicits._
     locRegCouConDF.map(r=>LocationDoc(
       r.getAs[Int]("con_id"),
       r.getAs[String]("con_name"),
@@ -79,15 +54,10 @@ object Extractor {
       r.getAs[Int]("loc_id"),
       r.getAs[String]("loc_name"),
       Location(r.getAs[Double]("loc_latitude"), r.getAs[Double]("loc_longitude"))
-    )).write.mode(SaveMode.Append)
-    .format("org.elasticsearch.spark.sql")
-    .option("es.resource","mapzen_locations/location")
-    .save()
-
-    ss.stop()
+    )).save("mapzen_locations/location")
+    sparkSession.stop()
   }
 
-  case class Location(lat:Double, lon: Double)
   case class LocationDoc(con_id: Int, con_name: String, con_lat_lon: Location,
                          cou_id: Int, cou_name: String, cou_lat_lon: Location,
                          reg_id: Int, reg_name: String, reg_lat_lon: Location,
