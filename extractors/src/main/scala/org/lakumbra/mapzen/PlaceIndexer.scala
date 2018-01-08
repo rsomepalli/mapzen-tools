@@ -1,21 +1,19 @@
 package org.lakumbra.mapzen
 
-import org.apache.commons.math3.ml.neuralnet.SquareNeighbourhood
-import org.apache.spark.sql.{SparkSession, SQLContext, Row}
+import org.apache.spark.sql.{Dataset, SparkSession, SQLContext, Row}
 
 object PlaceIndexer extends BaseIndexer{
 
   //scalastyle:off
   def main(args: Array[String]):Unit = {
 
-    implicit val (sparkSession, sqlContext) = super.init()
+    implicit val (sparkSession, sqlContext, csvio) = super.init()
 
     indexCountries(sqlContext)
     indexRegions(sqlContext)
     indexLocalities(sqlContext)
     indexNeighbourhoods(sqlContext)
     indexBoroughs(sqlContext)
-
 
   }
 
@@ -171,6 +169,7 @@ object PlaceIndexer extends BaseIndexer{
         ""
       )
     }).save("mapzen_places/place")
+
   }
 
   def indexCountries(sqlContext: SQLContext)(implicit sparkSession: SparkSession): Unit = {

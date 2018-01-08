@@ -13,7 +13,7 @@ object LocalityIndexer extends BaseIndexer{
   // scalastyle:off
   def main(args: Array[String]):Unit = {
 
-    implicit val (sparkSession, sqlContext) = super.init()
+    implicit val (sparkSession, sqlContext, csvio) = super.init()
 
     val locRegCouConDF = sqlContext.sql(
       """

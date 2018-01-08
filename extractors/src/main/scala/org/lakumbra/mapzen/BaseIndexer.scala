@@ -5,7 +5,7 @@ import org.apache.spark.sql._
 
 class BaseIndexer {
 
-  def init(): (SparkSession, SQLContext) = {
+  def init(): (SparkSession, SQLContext, CSVIO) = {
     val csvio = new SparkCSVIO
     val config = ConfigFactory.load()
     val ss = SparkSession.builder()
@@ -42,7 +42,7 @@ class BaseIndexer {
       .select("id", "name", "geom_latitude", "geom_longitude", "locality_id", "region_id", "country_id" )
       .createOrReplaceTempView("boroughs")
 
-    (ss, sqlContext)
+    (ss, sqlContext, csvio)
   }
 
   implicit class  ESIndexer(df: Dataset[_]){
