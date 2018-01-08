@@ -6,9 +6,7 @@ object PlaceIndexer extends BaseIndexer{
 
   //scalastyle:off
   def main(args: Array[String]):Unit = {
-
     implicit val (sparkSession, sqlContext, csvio) = super.init()
-
     indexCountries(sqlContext)
     indexRegions(sqlContext)
     indexLocalities(sqlContext)
@@ -35,9 +33,9 @@ object PlaceIndexer extends BaseIndexer{
         | reg.name as reg_name
         |FROM
         | boroughs bou
-        | join locations loc on bou.locality_id=loc.id
-        | left join regions reg on loc.region_id=reg.id
-        | join countries cou on loc.country_id=cou.id
+        |JOIN locations loc ON bou.locality_id=loc.id
+        |LEFT JOIN regions reg ON loc.region_id=reg.id
+        |JOIN countries cou ON loc.country_id=cou.id
       """.stripMargin)
       .repartition(10)
       .map(r => {
@@ -79,9 +77,9 @@ object PlaceIndexer extends BaseIndexer{
         | reg.name as reg_name
         |FROM
         | neighbourhoods nei
-        | join locations loc on nei.locality_id=loc.id
-        | left join regions reg on loc.region_id=reg.id
-        | join countries cou on loc.country_id=cou.id
+        |JOIN locations loc ON nei.locality_id=loc.id
+        |LEFT JOIN regions reg ON loc.region_id=reg.id
+        |JOIN countries cou ON loc.country_id=cou.id
       """.stripMargin)
       .repartition(10)
       .map(r => {
@@ -110,7 +108,7 @@ object PlaceIndexer extends BaseIndexer{
     sqlContext.sql(
       """
         |SELECT
-        |loc.id,
+        | loc.id,
         | loc.name,
         | loc.geom_latitude,
         | loc.geom_longitude,
@@ -120,8 +118,9 @@ object PlaceIndexer extends BaseIndexer{
         | loc.region_id as reg_id,
         | reg.name as reg_name
         |FROM
-        | locations loc left join regions reg on loc.region_id=reg.id
-        | join countries cou on loc.country_id=cou.id
+        | locations loc
+        |LEFT JOIN regions reg ON loc.region_id=reg.id
+        |JOIN countries cou ON loc.country_id=cou.id
       """.stripMargin)
       .repartition(10)
       .map(r => {
@@ -148,9 +147,16 @@ object PlaceIndexer extends BaseIndexer{
     import sparkSession.implicits._
     sqlContext.sql(
       """
-        |select r.id, r.name, r.geom_latitude, r.geom_longitude, r.country_id, c.name as country_name, c.iso_country
-        |from regions r
-        |join countries c on r.country_id=c.id
+        |SELECT
+        | r.id,
+        | r.name,
+        | r.geom_latitude,
+        | r.geom_longitude,
+        | r.country_id,
+        | c.name as country_name,
+        | c.iso_country
+        |FROM regions r
+        |JOIN countries c ON r.country_id=c.id
       """.stripMargin
     ).map(r => {
       val countryName = r.getAs[String]("country_name")
@@ -176,7 +182,14 @@ object PlaceIndexer extends BaseIndexer{
     import sparkSession.implicits._
     sqlContext.sql(
       """
-        |select id, name, geom_latitude, geom_longitude, parent_id, iso_country from countries
+        |SELECT
+        | id,
+        | name,
+        | geom_latitude,
+        | geom_longitude,
+        | parent_id,
+        | iso_country
+        |FROM countries
       """.stripMargin
     ).map(r => {
       val countryName = r.getAs[String]("name")
