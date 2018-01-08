@@ -34,6 +34,14 @@ class BaseIndexer {
       .select("id", "name", "geom_latitude", "geom_longitude", "region_id", "country_id" )
       .createOrReplaceTempView("locations")
 
+    csvio.loadCSVDataFrame(s"$baseFolder/wof-neighbourhood-latest.csv")
+      .select("id", "name", "geom_latitude", "geom_longitude", "locality_id", "region_id", "country_id" )
+      .createOrReplaceTempView("neighbourhoods")
+
+    csvio.loadCSVDataFrame(s"$baseFolder/wof-borough-latest.csv")
+      .select("id", "name", "geom_latitude", "geom_longitude", "locality_id", "region_id", "country_id" )
+      .createOrReplaceTempView("boroughs")
+
     (ss, sqlContext)
   }
 
