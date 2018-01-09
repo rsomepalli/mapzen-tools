@@ -1,0 +1,22 @@
+countries{
+  mapzen_count: 229
+  indexed_count: 229
+}
+regions{
+  mapzen_count: 4964
+  indexed_count: 4815
+}
+localities{
+  mapzen_count: 344249
+  indexed_count: 341793
+}
+
+neighbourhood{
+  mapzen_count: 91826
+  indexed_count: 67846
+}
+
+borough{
+  mapzen_count: 227
+  indexed_count: 227
+}
