@@ -7,10 +7,10 @@ object PlaceIndexer extends BaseIndexer{
   //scalastyle:off
   def main(args: Array[String]):Unit = {
     implicit val (sparkSession, sqlContext, csvio) = super.init()
-//    indexCountries(sqlContext)
-//    indexRegions(sqlContext)
-//    indexLocalities(sqlContext)
-//    indexNeighbourhoods(sqlContext)
+    indexCountries(sqlContext)
+    indexRegions(sqlContext)
+    indexLocalities(sqlContext)
+    indexNeighbourhoods(sqlContext)
     indexBoroughs(sqlContext)
 
   }
