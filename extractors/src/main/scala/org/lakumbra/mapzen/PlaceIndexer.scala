@@ -24,17 +24,21 @@ object PlaceIndexer extends BaseIndexer{
         | bou.name,
         | bou.geom_latitude,
         | bou.geom_longitude,
+        | bou.lbl_latitude,
+        | bou.lbl_longitude,
         | bou.locality_id,
         | loc.name as locality_name,
         | cou.id as country_id,
         | cou.name as country_name,
         | cou.iso_country,
         | loc.region_id as reg_id,
-        | reg.name as reg_name
+        | reg.name as reg_name,
+        | pr.population_rank
         |FROM
         | boroughs bou
         |JOIN locations loc ON bou.locality_id=loc.id
         |LEFT JOIN regions reg ON loc.region_id=reg.id
+        |LEFT JOIN population_rank pr ON bou.id=pr.id
         |JOIN countries cou ON loc.country_id=cou.id
       """.stripMargin)
       .repartition(10)
@@ -54,7 +58,8 @@ object PlaceIndexer extends BaseIndexer{
           r.getAs[String]("iso_country"),
           r.getAs[String]("reg_name"),
           localityName,
-          boroughName
+          boroughName,
+          r.getAs[Int]("population_rank")
         )
       }).save("mapzen_places/place")
   }
@@ -68,16 +73,20 @@ object PlaceIndexer extends BaseIndexer{
         | nei.name,
         | nei.geom_latitude,
         | nei.geom_longitude,
+        | nei.lbl_latitude,
+        | nei.lbl_longitude,
         | nei.locality_id,
         | loc.name as locality_name,
         | cou.id as country_id,
         | cou.name as country_name,
         | cou.iso_country,
         | loc.region_id as reg_id,
-        | reg.name as reg_name
+        | reg.name as reg_name,
+        | pr.population_rank
         |FROM
         | neighbourhoods nei
         |JOIN locations loc ON nei.locality_id=loc.id
+        |LEFT JOIN population_rank pr ON nei.id=pr.id
         |LEFT JOIN regions reg ON loc.region_id=reg.id
         |JOIN countries cou ON loc.country_id=cou.id
       """.stripMargin)
@@ -98,7 +107,8 @@ object PlaceIndexer extends BaseIndexer{
           r.getAs[String]("iso_country"),
           r.getAs[String]("reg_name"),
           localityName,
-          neighbourhoodName
+          neighbourhoodName,
+          r.getAs[Int]("population_rank")
         )
       }).save("mapzen_places/place")
   }
@@ -112,14 +122,18 @@ object PlaceIndexer extends BaseIndexer{
         | loc.name,
         | loc.geom_latitude,
         | loc.geom_longitude,
+        | loc.lbl_latitude,
+        | loc.lbl_longitude,
         | cou.id as country_id,
         | cou.name as country_name,
         | cou.iso_country,
         | loc.region_id as reg_id,
-        | reg.name as reg_name
+        | reg.name as reg_name,
+        | pr.population_rank
         |FROM
         | locations loc
         |LEFT JOIN regions reg ON loc.region_id=reg.id
+        |LEFT JOIN population_rank pr ON loc.id=pr.id
         |JOIN countries cou ON loc.country_id=cou.id
       """.stripMargin)
       .repartition(10)
@@ -138,7 +152,8 @@ object PlaceIndexer extends BaseIndexer{
           r.getAs[String]("iso_country"),
           regionName,
           localityName,
-          ""
+          "",
+          r.getAs[Int]("population_rank")
         )
       }).save("mapzen_places/place")
   }
@@ -152,10 +167,14 @@ object PlaceIndexer extends BaseIndexer{
         | r.name,
         | r.geom_latitude,
         | r.geom_longitude,
+        | r.lbl_latitude,
+        | r.lbl_longitude,
         | r.country_id,
         | c.name as country_name,
-        | c.iso_country
+        | c.iso_country,
+        | pr.population_rank
         |FROM regions r
+        |LEFT JOIN population_rank pr ON r.id=pr.id
         |JOIN countries c ON r.country_id=c.id
       """.stripMargin
     ).map(r => {
@@ -172,7 +191,8 @@ object PlaceIndexer extends BaseIndexer{
         r.getAs[String]("iso_country"),
         regionName,
         "",
-        ""
+        "",
+        r.getAs[Int]("population_rank")
       )
     }).save("mapzen_places/place")
 
@@ -183,13 +203,17 @@ object PlaceIndexer extends BaseIndexer{
     sqlContext.sql(
       """
         |SELECT
-        | id,
-        | name,
-        | geom_latitude,
-        | geom_longitude,
-        | parent_id,
-        | iso_country
-        |FROM countries
+        | c.id,
+        | c.name,
+        | c.geom_latitude,
+        | c.geom_longitude,
+        | c.lbl_latitude,
+        | c.lbl_longitude,
+        | c.parent_id,
+        | c.iso_country,
+        | pr.population_rank
+        |FROM countries c
+        |LEFT JOIN population_rank pr ON c.id=pr.id
       """.stripMargin
     ).map(r => {
       val countryName = r.getAs[String]("name")
@@ -204,27 +228,33 @@ object PlaceIndexer extends BaseIndexer{
         r.getAs[String]("iso_country"),
         "",
         "",
-        ""
+        "",
+        r.getAs[Int]("population_rank")
       )
     }).save("mapzen_places/place")
   }
 
   def buildLocation(r: Row): Location={
-    val lat = r.getAs[Any]("geom_latitude").toString
-    val lng = r.getAs[Any]("geom_longitude").toString
+    val geom_lat = r.getAs[Any]("geom_latitude").toString
+    val geom_lng = r.getAs[Any]("geom_longitude").toString
+    val lbl_lat = r.getAs[Any]("lbl_latitude").toString
+    val lbl_lng = r.getAs[Any]("lbl_longitude").toString
+
     try {
-      if (lat.isEmpty || lng.isEmpty)
-        Location(0.0, 0.0)
+      if (!lbl_lat.isEmpty && !lbl_lng.isEmpty)
+        Location(lbl_lat.toDouble, lbl_lat.toDouble)
+      else if (!geom_lat.isEmpty && !geom_lng.isEmpty)
+        Location(geom_lng.toDouble, geom_lng.toDouble)
       else
-        Location(lat.toDouble, lng.toDouble)
+        Location(0.0, 0.0)
     }catch {
       case e:Exception =>
-        println(s"lat: $lat lng $lng")
+        println(s"geom_lat: $geom_lat geom_lng $geom_lng   lbl_lat: $lbl_lat lbl_lng $lbl_lng")
         Location(0.0, 0.0)
     }
   }
 
-  case class Place(id:Int, name: String, lat_lon: Location, parent_id: Int,  layer: String, label: String, country: String, country_a: String, region: String, locality: String, neighbourhood_borough: String)
+  case class Place(id:Int, name: String, lat_lon: Location, parent_id: Int,  layer: String, label: String, country: String, country_a: String, region: String, locality: String, neighbourhood_borough: String, population_rank:Int)
 
 }
 
