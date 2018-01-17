@@ -242,9 +242,9 @@ object PlaceIndexer extends BaseIndexer{
 
     try {
       if (!lbl_lat.isEmpty && !lbl_lng.isEmpty)
-        Location(lbl_lat.toDouble, lbl_lat.toDouble)
+        Location(lbl_lat.toDouble, lbl_lng.toDouble)
       else if (!geom_lat.isEmpty && !geom_lng.isEmpty)
-        Location(geom_lng.toDouble, geom_lng.toDouble)
+        Location(geom_lat.toDouble, geom_lng.toDouble)
       else
         Location(0.0, 0.0)
     }catch {
