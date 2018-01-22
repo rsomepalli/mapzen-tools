@@ -15,7 +15,7 @@ object PlaceIndexer extends BaseIndexer{
 
   }
 
-  def indexBoroughs(sqlContext: SQLContext)(implicit sparkSession: SparkSession): Unit = {
+  def indexBoroughs(sqlContext: SQLContext)(implicit sparkSession: SparkSession, csvio: CSVIO): Unit = {
     import sparkSession.implicits._
     sqlContext.sql(
       """
@@ -61,10 +61,10 @@ object PlaceIndexer extends BaseIndexer{
           boroughName,
           r.getAs[Int]("population_rank")
         )
-      }).save("mapzen_places/place")
+      }).save("mapzen_places/place", "borough")
   }
 
-  def indexNeighbourhoods(sqlContext: SQLContext)(implicit sparkSession: SparkSession): Unit = {
+  def indexNeighbourhoods(sqlContext: SQLContext)(implicit sparkSession: SparkSession, csvio: CSVIO): Unit = {
     import sparkSession.implicits._
     sqlContext.sql(
       """
@@ -110,10 +110,10 @@ object PlaceIndexer extends BaseIndexer{
           neighbourhoodName,
           r.getAs[Int]("population_rank")
         )
-      }).save("mapzen_places/place")
+      }).save("mapzen_places/place", "neighbourhood")
   }
 
-  def indexLocalities(sqlContext: SQLContext)(implicit sparkSession: SparkSession): Unit = {
+  def indexLocalities(sqlContext: SQLContext)(implicit sparkSession: SparkSession, csvio: CSVIO): Unit = {
     import sparkSession.implicits._
     sqlContext.sql(
       """
@@ -155,10 +155,10 @@ object PlaceIndexer extends BaseIndexer{
           "",
           r.getAs[Int]("population_rank")
         )
-      }).save("mapzen_places/place")
+      }).save("mapzen_places/place", "locality")
   }
 
-  def indexRegions(sqlContext: SQLContext)(implicit sparkSession: SparkSession): Unit = {
+  def indexRegions(sqlContext: SQLContext)(implicit sparkSession: SparkSession, csvio: CSVIO): Unit = {
     import sparkSession.implicits._
     sqlContext.sql(
       """
@@ -194,11 +194,11 @@ object PlaceIndexer extends BaseIndexer{
         "",
         r.getAs[Int]("population_rank")
       )
-    }).save("mapzen_places/place")
+    }).save("mapzen_places/place", "region")
 
   }
 
-  def indexCountries(sqlContext: SQLContext)(implicit sparkSession: SparkSession): Unit = {
+  def indexCountries(sqlContext: SQLContext)(implicit sparkSession: SparkSession, csvio: CSVIO): Unit = {
     import sparkSession.implicits._
     sqlContext.sql(
       """
@@ -231,7 +231,7 @@ object PlaceIndexer extends BaseIndexer{
         "",
         r.getAs[Int]("population_rank")
       )
-    }).save("mapzen_places/place")
+    }).save("mapzen_places/place", "country")
   }
 
   def buildLocation(r: Row): Location={
@@ -255,6 +255,7 @@ object PlaceIndexer extends BaseIndexer{
   }
 
   case class Place(id:Int, name: String, lat_lon: Location, parent_id: Int,  layer: String, label: String, country: String, country_a: String, region: String, locality: String, neighbourhood_borough: String, population_rank:Int)
+
 
 }
 

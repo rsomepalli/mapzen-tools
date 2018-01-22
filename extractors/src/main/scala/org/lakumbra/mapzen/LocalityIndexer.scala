@@ -54,7 +54,7 @@ object LocalityIndexer extends BaseIndexer{
       r.getAs[Int]("loc_id"),
       r.getAs[String]("loc_name"),
       Location(r.getAs[Double]("loc_latitude"), r.getAs[Double]("loc_longitude"))
-    )).save("mapzen_locations/location")
+    )).save("mapzen_locations/location", "")
     sparkSession.stop()
   }
 

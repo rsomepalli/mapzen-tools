@@ -39,6 +39,7 @@ class SparkCSVIO extends CSVIO{
           .format("com.databricks.spark.csv")
           .option("header", "true")
           .option("inferSchema", "true")
+
           .option("comment", "#")
           .load(csvFile)
     }
@@ -50,8 +51,10 @@ class SparkCSVIO extends CSVIO{
 
   override def writeDataFrame(path: String, df: DataFrame)(implicit sqlContext: SQLContext): Unit = {
     df.write
+      .mode(SaveMode.Append)
       .format("com.databricks.spark.csv")
       .option("header", "true")
+      .option("quoteAll", "true")
       .option("comment", "#")
       .save(path)
   }
