@@ -78,7 +78,7 @@ class BaseIndexer {
           p.neighbourhood_borough,
           p.population_rank)).toDF()
           .repartition(1)
-        csvio.writeDataFrame(s"output/${inputType}.csv", df)(sparkSession.sqlContext)
+        csvio.writeDataFrame(s"output/${inputType}", df)(sparkSession.sqlContext)
       }
     }
 
@@ -86,8 +86,8 @@ class BaseIndexer {
 case class Location(lat:Double, lon: Double)
 case class PlaceFlat(id:Int,
                      name: String,
-                     latitude: Double,
-                     longitude: Double,
+                     lat: Double,
+                     lon: Double,
                      parent_id: Int,
                      layer: String,
                      label: String,
