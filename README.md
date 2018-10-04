@@ -6,4 +6,4 @@ Tool to load the location into an elastic search index.
 - git@github.com:rsomepalli/mapzen-tools.git
 - sbt
 - project extractors
-- run-main org.lakumbra.mapzen.PlacesIndexer
+- run-main org.lakumbra.mapzen.PlaceIndexer
