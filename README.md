@@ -7,3 +7,6 @@ Tool to load the location into an elastic search index.
 - sbt
 - project extractors
 - run-main org.lakumbra.mapzen.PlaceIndexer
+
+# Use Generated csv fiels to import places into elastic search
+https://jira.evbhome.com/browse/OPS-15952
