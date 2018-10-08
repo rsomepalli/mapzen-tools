@@ -47,13 +47,14 @@ object PlaceIndexer extends BaseIndexer{
         val localityName = r.getAs[String]("locality_name")
         val countryName = r.getAs[String]("country_name")
         val regionName = r.getAs[String]("reg_name")
+        val boroghLocalityName = Seq(boroughName, localityName).filter(_ != null).mkString(" ")
         Place(
           r.getAs[Int]("id"),
           boroughName,
           buildLocation(r),
           r.getAs[Int]("locality_id"),
           "borough",
-          s"$boroughName $localityName, $regionName, $countryName",
+          Seq(boroghLocalityName, regionName, countryName).filter(_ != null).mkString(","),
           r.getAs[String]("country_name"),
           r.getAs[String]("iso_country"),
           r.getAs[String]("reg_name"),
@@ -96,13 +97,14 @@ object PlaceIndexer extends BaseIndexer{
         val localityName = r.getAs[String]("locality_name")
         val countryName = r.getAs[String]("country_name")
         val regionName = r.getAs[String]("reg_name")
+        val neighbourhoodLocalityName = Seq(regionName, localityName).filter(_ != null).mkString(" ")
         Place(
           r.getAs[Int]("id"),
           neighbourhoodName,
           buildLocation(r),
           r.getAs[Int]("locality_id"),
           "neighbourhood",
-          s"$neighbourhoodName $localityName, $regionName, $countryName",
+          Seq(neighbourhoodLocalityName, regionName, countryName).filter(_ != null).mkString(","),
           r.getAs[String]("country_name"),
           r.getAs[String]("iso_country"),
           r.getAs[String]("reg_name"),
@@ -147,7 +149,7 @@ object PlaceIndexer extends BaseIndexer{
           buildLocation(r),
           r.getAs[Int]("country_id"),
           "locality",
-          s"$localityName, $regionName, $countryName ",
+          Seq(localityName, regionName, countryName).filter(_ != null).mkString(","),
           countryName,
           r.getAs[String]("iso_country"),
           regionName,
@@ -186,7 +188,7 @@ object PlaceIndexer extends BaseIndexer{
         buildLocation(r),
         r.getAs[Int]("country_id"),
         "region",
-        s"$regionName, $countryName ",
+        Seq(regionName, countryName).filter(_ != null).mkString(","),
         countryName,
         r.getAs[String]("iso_country"),
         regionName,
@@ -258,4 +260,3 @@ object PlaceIndexer extends BaseIndexer{
 
 
 }
-
