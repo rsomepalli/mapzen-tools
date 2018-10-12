@@ -20,27 +20,27 @@ class BaseIndexer {
     val baseFolder = config.getString("lakumbra.input-files.folder")
     implicit val sqlContext = ss.sqlContext
     csvio.loadCSVDataFrame(s"${baseFolder}/wof-continent-latest.csv")
-      .select("id", "name", "geom_latitude", "geom_longitude", "lbl_latitude", "lbl_longitude" )
+      .select("id", "name", "geom_latitude", "geom_longitude", "lbl_latitude", "lbl_longitude", "superseded_by", "cessation", "deprecated" )
       .createOrReplaceTempView("continents")
 
     csvio.loadCSVDataFrame(s"$baseFolder/wof-country-latest.csv")
-      .select("id", "name", "geom_latitude", "geom_longitude" , "parent_id", "iso_country", "lbl_latitude", "lbl_longitude")
+      .select("id", "name", "geom_latitude", "geom_longitude" , "parent_id", "iso_country", "lbl_latitude", "lbl_longitude", "superseded_by", "cessation", "deprecated")
       .createOrReplaceTempView("countries")
 
     csvio.loadCSVDataFrame(s"$baseFolder/wof-region-latest.csv")
-      .select("id", "name", "geom_latitude", "geom_longitude" , "country_id", "lbl_latitude", "lbl_longitude")
+      .select("id", "name", "geom_latitude", "geom_longitude" , "country_id", "lbl_latitude", "lbl_longitude", "superseded_by", "cessation", "deprecated")
       .createOrReplaceTempView("regions")
 
     csvio.loadCSVDataFrame(s"$baseFolder/wof-locality-latest.csv")
-      .select("id", "name", "geom_latitude", "geom_longitude", "region_id", "country_id" , "lbl_latitude", "lbl_longitude")
+      .select("id", "name", "geom_latitude", "geom_longitude", "region_id", "country_id" , "lbl_latitude", "lbl_longitude", "superseded_by", "cessation", "deprecated")
       .createOrReplaceTempView("locations")
 
     csvio.loadCSVDataFrame(s"$baseFolder/wof-neighbourhood-latest.csv")
-      .select("id", "name", "geom_latitude", "geom_longitude", "locality_id", "region_id", "country_id" , "lbl_latitude", "lbl_longitude")
+      .select("id", "name", "geom_latitude", "geom_longitude", "locality_id", "region_id", "country_id" , "lbl_latitude", "lbl_longitude", "superseded_by", "cessation", "deprecated")
       .createOrReplaceTempView("neighbourhoods")
 
     csvio.loadCSVDataFrame(s"$baseFolder/wof-borough-latest.csv")
-      .select("id", "name", "geom_latitude", "geom_longitude", "locality_id", "region_id", "country_id" , "lbl_latitude", "lbl_longitude")
+      .select("id", "name", "geom_latitude", "geom_longitude", "locality_id", "region_id", "country_id" , "lbl_latitude", "lbl_longitude", "superseded_by", "cessation", "deprecated")
       .createOrReplaceTempView("boroughs")
 
     csvio.loadCSVDataFrame(s"$baseFolder/wof-population-rank.csv")
